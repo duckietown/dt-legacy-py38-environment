@@ -1,0 +1,8 @@
+name: "dt-legacy-py38-environment"
+maintainer:
+    name: "Andrea F. Daniele"
+    email: "afdaniele@duckietown.com"
+description: "Legacy Base Docker image environment based on Ubuntu Focal and Python 3.8"
+version: 0.0.0
+# pick an icon from: https://fontawesome.com/v4.7.0/icons/
+icon: square
