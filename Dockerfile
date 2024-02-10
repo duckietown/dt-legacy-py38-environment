@@ -8,7 +8,6 @@ ARG BASE_TAG=${DISTRO}-${ARCH}
 ARG LAUNCHER=default
 ARG OS_FAMILY=ubuntu
 ARG OS_DISTRO=focal
-ARG ROS_DISTRO=noetic
 # ---
 ARG PROJECT_NAME
 ARG PROJECT_MAINTAINER
@@ -49,6 +48,7 @@ ENV INITSYSTEM="off" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED="1" \
     DEBIAN_FRONTEND="noninteractive" \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
     DISABLE_CONTRACTS=1 \
     QEMU_EXECVE=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -125,6 +125,18 @@ ENV DT_USER_NAME="duckie" \
 
 # install dependencies (PIP3)
 RUN dt-pip3-install "${SOURCE_DIR}/dt-commons/dependencies-py3.*"
+
+# install LCM
+ENV LCM_VERSION="1.5.0"
+RUN cd /tmp/ \
+    && git clone -b "v${LCM_VERSION}" https://github.com/lcm-proj/lcm \
+    && mkdir -p lcm/build \
+    && cd lcm/build \
+    && cmake .. \
+    && make \
+    && make install \
+    && cd ~ \
+    && rm -rf /tmp/lcm
 
 # create `duckie` user
 RUN addgroup --gid ${DT_GROUP_GID} "${DT_GROUP_NAME}" && \
