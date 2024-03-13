@@ -140,7 +140,7 @@ RUN addgroup --gid ${DT_GROUP_GID} "${DT_GROUP_NAME}" && \
         "${DT_USER_NAME}"
 
 # copy image root
-COPY ${SOURCE_DIR}/dt-commons/assets/root/. /
+RUN cp -R ${SOURCE_DIR}/dt-commons/assets/root/. /
 
 # configure arch-specific environment
 RUN ${SOURCE_DIR}/dt-commons/assets/setup/${TARGETPLATFORM}/setup.sh
