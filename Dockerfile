@@ -52,6 +52,7 @@ ENV INITSYSTEM="off" \
     DISABLE_CONTRACTS=1 \
     QEMU_EXECVE=1 \
     PIP_NO_CACHE_DIR=1 \
+    PYTHON_VERSION=3.8 \
     PIP_ROOT_USER_ACTION=ignore
 
 # nvidia runtime configuration
@@ -141,10 +142,8 @@ RUN addgroup --gid ${DT_GROUP_GID} "${DT_GROUP_NAME}" && \
 # configure arch-specific environment
 RUN ${SOURCE_DIR}/dt-commons/assets/setup/${TARGETPLATFORM}/setup.sh
 
-# copy binaries and scripts
-RUN cp ${SOURCE_DIR}/dt-commons/assets/bin/* /usr/local/bin/ && \
-    cp ${SOURCE_DIR}/dt-commons/assets/entrypoint.sh /entrypoint.sh && \
-    cp ${SOURCE_DIR}/dt-commons/assets/environment.sh /environment.sh
+# install assets
+RUN ${SOURCE_DIR}/dt-commons/assets/setup/install-binaries.sh
 
 # source environment on every bash session
 RUN echo "source /environment.sh" >> /etc/bash.bashrc
