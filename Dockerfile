@@ -99,7 +99,7 @@ RUN python3 -m pip install pip==22.2 && \
     ln -s $(which python3.8) /usr/bin/pip3.8
 
 # install dependencies (PIP3), exclude computed lists because of the difference in base image
-RUN rm -f "${SOURCE_DIR}/dt-base-environment/dependencies-py3.computed.*" && \
+RUN rm -f "${SOURCE_DIR}/dt-base-environment/dependencies-py3.computed.txt" && \
     dt-pip3-install "${SOURCE_DIR}/dt-base-environment/dependencies-py3.*"
 
 # configure terminal size in docker: https://docs.python.org/3/library/shutil.html#shutil.get_terminal_size
@@ -126,7 +126,7 @@ ENV DT_USER_NAME="duckie" \
     DT_USER_HOME="/home/duckie"
 
 # install dependencies (PIP3), exclude computed lists because of the difference in base image
-RUN rm -f "${SOURCE_DIR}/dt-commons/dependencies-py3.computed.*" && \
+RUN rm -f "${SOURCE_DIR}/dt-commons/dependencies-py3.computed.txt" && \
     dt-pip3-install "${SOURCE_DIR}/dt-commons/dependencies-py3.*"
 
 # create `duckie` user
