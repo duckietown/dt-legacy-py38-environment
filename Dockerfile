@@ -276,3 +276,6 @@ LABEL \
     org.duckietown.label.base.organization="${BASE_ORGANIZATION}" \
     org.duckietown.label.base.repository="${BASE_REPOSITORY}" \
     org.duckietown.label.base.tag="${BASE_TAG}"
+
+# make all containers down the tree run as root
+ENV DT_SUPERUSER=1
