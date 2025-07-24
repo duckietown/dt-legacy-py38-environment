@@ -91,6 +91,7 @@ RUN apt-get update \
         make \
         cmake \
         gcc \
+        git \
         sudo \
   && rm -rf /var/lib/apt/lists/*
 
