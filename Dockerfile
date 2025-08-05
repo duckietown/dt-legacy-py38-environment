@@ -53,7 +53,9 @@ ENV INITSYSTEM="off" \
     QEMU_EXECVE=1 \
     PIP_NO_CACHE_DIR=1 \
     PYTHON_VERSION=3.8 \
-    PIP_ROOT_USER_ACTION=ignore
+    PIP_ROOT_USER_ACTION=ignore \
+    UV_SYSTEM_PYTHON=1 \
+    UV_BREAK_SYSTEM_PACKAGES=1
 
 # nvidia runtime configuration
 ENV NVIDIA_VISIBLE_DEVICES="all" \
@@ -98,6 +100,9 @@ RUN apt-get update \
 # upgrade PIP
 RUN python3 -m pip install pip==22.2 && \
     ln -s $(which python3.8) /usr/bin/pip3.8
+
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # install dependencies (PIP3), exclude computed lists because of the difference in base image
 RUN rm -f "${SOURCE_DIR}/dt-base-environment/dependencies-py3.computed.txt" && \
