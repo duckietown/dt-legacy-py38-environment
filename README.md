@@ -1,3 +1,3 @@
-# dt-legacy-py38-environment
+# dt-legacy-py36-environment
 
-Legacy Base Docker image environment based on Ubuntu Focal and Python 3.8.
+Legacy Base Docker image environment based on Ubuntu Bionic and Python 3.6.

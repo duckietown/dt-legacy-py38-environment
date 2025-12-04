@@ -7,7 +7,7 @@ ARG BASE_ORGANIZATION=duckietown
 ARG BASE_TAG=${DISTRO}-${ARCH}
 ARG LAUNCHER=default
 ARG OS_FAMILY=ubuntu
-ARG OS_DISTRO=focal
+ARG OS_DISTRO=bionic
 # ---
 ARG PROJECT_NAME
 ARG PROJECT_MAINTAINER
@@ -20,7 +20,7 @@ ARG PROJECT_FORMAT_VERSION
 FROM ${DOCKER_REGISTRY}/${BASE_ORGANIZATION}/${BASE_REPOSITORY}:${BASE_TAG} as duckietown
 
 # base image
-FROM docker.io/${ARCH}/${OS_FAMILY}:${OS_DISTRO}
+FROM nvcr.io/nvidia/l4t-ml:r32.7.1-py3
 
 # configure pip
 ARG PIP_INDEX_URL="https://pypi.org/simple"
@@ -51,11 +51,8 @@ ENV INITSYSTEM="off" \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     DISABLE_CONTRACTS=1 \
     QEMU_EXECVE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PYTHON_VERSION=3.8 \
-    PIP_ROOT_USER_ACTION=ignore \
-    UV_SYSTEM_PYTHON=1 \
-    UV_BREAK_SYSTEM_PACKAGES=1
+    PYTHON_VERSION=3.6 \
+    PIP_ROOT_USER_ACTION=ignore
 
 # nvidia runtime configuration
 ENV NVIDIA_VISIBLE_DEVICES="all" \
@@ -84,6 +81,9 @@ RUN rm -rf "${SOURCE_DIR}/dt-base-environment/packages"
 RUN cp ${SOURCE_DIR}/dt-base-environment/assets/qemu/${TARGETPLATFORM}/* /usr/bin/ && \
     cp ${SOURCE_DIR}/dt-base-environment/assets/bin/* /usr/local/bin/
 
+# copy local dt-pip3-install that works with Python 3.6
+COPY ./assets/bin/dt-pip3-install /usr/local/bin/dt-pip3-install
+
 # Install gnupg required for apt-key (not in base image since Focal)
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -97,16 +97,14 @@ RUN apt-get update \
         sudo \
   && rm -rf /var/lib/apt/lists/*
 
-# upgrade PIP
-RUN python3 -m pip install pip==22.2 && \
-    ln -s $(which python3.8) /usr/bin/pip3.8
+# Upgrade pip and install setuptools for Python 3.6
+RUN python3 -m pip install --upgrade pip setuptools wheel
 
-# install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-# install dependencies (PIP3), exclude computed lists because of the difference in base image
+# install dependencies (PIP3), exclude computed lists and packages incompatible with Python 3.6
+# Skip dt-base-environment dependencies that require Python 3.9+ (matplotlib 3.8+, scipy 1.13+, etc.)
+# These will be installed with Python 3.6-compatible versions later
 RUN rm -f "${SOURCE_DIR}/dt-base-environment/dependencies-py3.computed.txt" && \
-    dt-pip3-install "${SOURCE_DIR}/dt-base-environment/dependencies-py3.*"
+    echo "Skipping dt-base-environment Python dependencies (incompatible with Python 3.6)"
 
 # configure terminal size in docker: https://docs.python.org/3/library/shutil.html#shutil.get_terminal_size
 ENV COLUMNS 160
@@ -131,9 +129,10 @@ ENV DT_USER_NAME="duckie" \
     DT_GROUP_GID=2222 \
     DT_USER_HOME="/home/duckie"
 
-# install dependencies (PIP3), exclude computed lists because of the difference in base image
+# Skip dt-commons dependencies due to poetry_dynamic_versioning build backend issues
+# The essential packages will be installed manually later
 RUN rm -f "${SOURCE_DIR}/dt-commons/dependencies-py3.computed.txt" && \
-    dt-pip3-install "${SOURCE_DIR}/dt-commons/dependencies-py3.*"
+    echo "Skipping dt-commons Python dependencies (build backend incompatibility)"
 
 # create `duckie` user
 RUN addgroup --gid ${DT_GROUP_GID} "${DT_GROUP_NAME}" && \
@@ -150,8 +149,9 @@ RUN addgroup --gid ${DT_GROUP_GID} "${DT_GROUP_NAME}" && \
 # copy image root
 RUN cp -R ${SOURCE_DIR}/dt-commons/assets/root/. /
 
-# configure arch-specific environment
-RUN ${SOURCE_DIR}/dt-commons/assets/setup/${TARGETPLATFORM}/setup.sh
+# Skip arch-specific setup from dt-commons (requires Raspberry Pi packages)
+# Custom Jetson setup not needed at this stage
+RUN echo "Skipping arch-specific setup (Jetson device, no RPi packages needed)"
 
 # install assets
 RUN ${SOURCE_DIR}/dt-commons/assets/setup/install-binaries.sh

@@ -1,4 +1,4 @@
-name: "dt-legacy-py38-environment"
+name: "dt-legacy-py36-environment"
 maintainer:
     name: "Andrea F. Daniele"
     email: "afdaniele@duckietown.com"
